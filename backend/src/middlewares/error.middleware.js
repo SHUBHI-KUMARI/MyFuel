@@ -26,8 +26,11 @@ const errorHandler = (err, req, res, next) => {
 		response.errors = Object.keys(err.keyValue || {});
 	}
 
+	if (err.name === "CastError") {
+		response.message = "Invalid id format";
+	}
+
 	res.status(status).json(response);
-	next();
 };
 
 module.exports = {

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Order = require("../models/order.model");
-const { ORDER_STATUS } = require("../constants/orderStatus");
+const { ORDER_STATUS, normalizeOrderStatus } = require("../constants/orderStatus");
 
 const ensureValidObjectId = (id, message) => {
 	if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -50,12 +50,13 @@ const getAdminOrders = async ({ status, search, from, to, page = 1, limit = 20 }
 	const filters = {};
 
 	if (status) {
-		if (!ORDER_STATUS.includes(status)) {
+		const normalizedStatus = normalizeOrderStatus(status);
+		if (!ORDER_STATUS.includes(normalizedStatus)) {
 			const error = new Error("Invalid status filter");
 			error.status = 400;
 			throw error;
 		}
-		filters.status = status;
+		filters.status = normalizedStatus;
 	}
 
 	if (from || to) {
@@ -111,8 +112,9 @@ const getAdminOrders = async ({ status, search, from, to, page = 1, limit = 20 }
 
 const updateOrderStatus = async ({ orderId, status }) => {
 	ensureValidObjectId(orderId, "Invalid order id");
+	const normalizedStatus = normalizeOrderStatus(status);
 
-	if (!ORDER_STATUS.includes(status)) {
+	if (!ORDER_STATUS.includes(normalizedStatus)) {
 		const error = new Error("Invalid status");
 		error.status = 400;
 		throw error;
@@ -120,7 +122,7 @@ const updateOrderStatus = async ({ orderId, status }) => {
 
 	const order = await Order.findByIdAndUpdate(
 		orderId,
-		{ status },
+		{ status: normalizedStatus },
 		{ new: true }
 	);
 

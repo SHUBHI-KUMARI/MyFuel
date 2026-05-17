@@ -23,18 +23,29 @@ export default function OrderHistory() {
     }
   };
 
+  const normalizeStatus = (status) =>
+    String(status || "").trim().toLowerCase().replace(/\s+/g, "-");
+
+  const formatStatusLabel = (status) => {
+    const normalized = normalizeStatus(status);
+    if (!normalized) return "";
+
+    return normalized
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   const getStatusColor = (status) => {
-    switch (status) {
+    switch (normalizeStatus(status)) {
       case "pending":
         return "text-yellow-800 bg-yellow-100";
-      case "assigned":
+      case "accepted":
         return "text-blue-800 bg-blue-100";
-      case "in-transit":
+      case "out-for-delivery":
         return "text-indigo-800 bg-indigo-100";
       case "delivered":
         return "text-green-800 bg-green-100";
-      case "cancelled":
-        return "text-red-800 bg-red-100";
       default:
         return "text-gray-800 bg-gray-100";
     }
@@ -42,7 +53,7 @@ export default function OrderHistory() {
 
   const filteredOrders = orders.filter((order) => {
     if (filterStatus === "all") return true;
-    return order.status === filterStatus;
+    return normalizeStatus(order.status) === filterStatus;
   });
 
   if (loading)
@@ -81,10 +92,9 @@ export default function OrderHistory() {
           >
             <option value="all">All Orders</option>
             <option value="pending">Pending</option>
-            <option value="assigned">Assigned</option>
-            <option value="in-transit">In Transit</option>
+            <option value="accepted">Accepted</option>
+            <option value="out-for-delivery">Out for Delivery</option>
             <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
           </select>
         </div>
       </div>
@@ -113,7 +123,7 @@ export default function OrderHistory() {
                 <span
                   className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full capitalize ${getStatusColor(order.status)}`}
                 >
-                  {order.status}
+                  {formatStatusLabel(order.status)}
                 </span>
               </div>
               <div className="text-sm text-gray-500 space-y-1">
@@ -213,7 +223,7 @@ export default function OrderHistory() {
                         </span>
                         {order.preferredDeliveryTime && (
                           <span className="text-xs text-gray-500 font-normal">
-                            Pref:{" "}
+                            {formatStatusLabel(order.status)}
                             {new Date(
                               order.preferredDeliveryTime,
                             ).toLocaleTimeString([], {

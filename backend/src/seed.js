@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose");
 const env = require("./config/env");
 const { connectDb } = require("./config/db");
 const User = require("./models/user.model");
@@ -28,7 +29,7 @@ const seed = async () => {
 
 		const users = await User.create([
 			{
-				name: "Rahul Mehta",
+				name: "Aditi",
 				email: "user@myfuel.test",
 				passwordHash: userHash,
 				role: "user",
@@ -49,66 +50,73 @@ const seed = async () => {
 
 		const [rahul, aisha, daniel] = users;
 
+		const buildOrder = (order) => ({
+			...order,
+			_id: mongoose.Types.ObjectId.createFromTime(
+				Math.floor(order.createdAt.getTime() / 1000)
+			),
+		});
+
 		const orders = [
-			{
+			buildOrder({
 				userId: rahul._id,
 				fuelType: "Petrol",
 				quantity: 120,
 				deliveryLocation: "MG Road, Bengaluru",
 				preferredDeliveryTime: hoursFromNow(6),
-				status: "Pending",
+				status: "pending",
 				createdAt: hoursAgo(18),
 				updatedAt: hoursAgo(18),
-			},
-			{
+			}),
+			buildOrder({
 				userId: rahul._id,
 				fuelType: "Diesel",
 				quantity: 320,
 				deliveryLocation: "Hinjewadi Phase 2, Pune",
 				preferredDeliveryTime: hoursFromNow(24),
-				status: "Delivered",
+				status: "delivered",
 				createdAt: daysAgo(12),
 				updatedAt: daysAgo(10),
-			},
-			{
+			}),
+			buildOrder({
 				userId: aisha._id,
 				fuelType: "Premium Petrol",
 				quantity: 90,
 				deliveryLocation: "Gachibowli, Hyderabad",
 				preferredDeliveryTime: hoursFromNow(4),
-				status: "Accepted",
+				status: "accepted",
 				createdAt: daysAgo(3),
 				updatedAt: daysAgo(2),
-			},
-			{
+			}),
+			buildOrder({
 				userId: aisha._id,
 				fuelType: "Diesel",
 				quantity: 200,
 				deliveryLocation: "Navrangpura, Ahmedabad",
 				preferredDeliveryTime: hoursFromNow(12),
-				status: "Out for Delivery",
+				status: "out-for-delivery",
 				createdAt: daysAgo(2),
 				updatedAt: daysAgo(1),
-			},
-			{
+			}),
+			buildOrder({
 				userId: daniel._id,
 				fuelType: "CNG",
 				quantity: 70,
 				deliveryLocation: "Indiranagar, Bengaluru",
-				status: "Pending",
+				status: "pending",
 				createdAt: hoursAgo(6),
 				updatedAt: hoursAgo(6),
-			},
-			{
+			}),
+			buildOrder({
 				userId: daniel._id,
 				fuelType: "Diesel",
 				quantity: 500,
 				deliveryLocation: "Whitefield, Bengaluru",
 				preferredDeliveryTime: hoursFromNow(36),
-				status: "Delivered",
+				status: "delivered",
 				createdAt: daysAgo(20),
 				updatedAt: daysAgo(18),
-			},
+			}),
 		];
 
 		await Order.insertMany(orders);

@@ -5,6 +5,12 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [statusOptions, setStatusOptions] = useState([
+    "pending",
+    "accepted",
+    "out-for-delivery",
+    "delivered",
+  ]);
 
   // Filters and Pagination
   const [statusFilter, setStatusFilter] = useState("");
@@ -38,6 +44,27 @@ export default function AdminOrders() {
     fetchOrders();
   }, [statusFilter, page]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchStatuses = async () => {
+      try {
+        const { data } = await api.get("/admin/orders/statuses");
+        if (isMounted && Array.isArray(data.statuses) && data.statuses.length) {
+          setStatusOptions(data.statuses);
+        }
+      } catch (err) {
+        // Keep default status list if the request fails.
+      }
+    };
+
+    fetchStatuses();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Debounced search
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -64,26 +91,35 @@ export default function AdminOrders() {
     }
   };
 
+  const normalizeStatus = (status) =>
+    String(status || "").trim().toLowerCase().replace(/\s+/g, "-");
+
+  const formatStatusLabel = (status) => {
+    const normalized = normalizeStatus(status);
+    if (!normalized) return "";
+
+    return normalized
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   const getStatusColor = (status) => {
-    switch (status) {
+    const statusKey = normalizeStatus(status);
+
+    switch (statusKey) {
       case "pending":
         return "text-yellow-800 bg-yellow-100";
-      case "assigned":
+      case "accepted":
         return "text-blue-800 bg-blue-100";
-      case "in-transit":
+      case "out-for-delivery":
         return "text-indigo-800 bg-indigo-100";
       case "delivered":
         return "text-green-800 bg-green-100";
-      case "cancelled":
-        return "text-red-800 bg-red-100";
       default:
         return "text-gray-800 bg-gray-100";
     }
   };
-
-  // Compute analytics
-  const totalOrders = meta.total;
-  const pendingCount = orders.filter((o) => o.status === "pending").length; // Current page estimate, could be better if backend returned count, but we'll use this or a general summary if needed. Wait, we can just show metrics based on what we have.
 
   return (
     <div className="space-y-6">
@@ -141,11 +177,11 @@ export default function AdminOrders() {
               className="input-field bg-white"
             >
               <option value="">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="assigned">Assigned</option>
-              <option value="in-transit">In Transit</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
+              {statusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {formatStatusLabel(status)}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -219,62 +255,66 @@ export default function AdminOrders() {
                     </td>
                   </tr>
                 ) : (
-                  orders.map((order) => (
-                    <tr
-                      key={order._id}
-                      className="hover:bg-gray-50/80 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div className="font-semibold text-gray-900">
-                          #{order._id.substring(0, 8)}
-                        </div>
-                        <div className="text-gray-500 font-medium">
-                          {new Date(order.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="font-medium text-gray-900">
-                          {order.userId?.name || "Unknown"}
-                        </div>
-                        <div className="text-gray-500 text-xs">
-                          {order.userId?.email || ""}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <span className="capitalize font-medium">{order.fuelType}</span>
-                        <div className="text-gray-500">({order.quantity}L)</div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
-                        {order.deliveryLocation}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full capitalize ${getStatusColor(order.status)}`}
-                        >
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <select
-                          disabled={
-                            updatingId === order._id ||
-                            order.status === "cancelled"
-                          }
-                          value={order.status}
-                          onChange={(e) =>
-                            handleStatusChange(order._id, e.target.value)
-                          }
-                          className={`block w-full pl-3 pr-8 py-1.5 text-xs font-medium bg-gray-50 border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 rounded-md border ${updatingId === order._id ? "opacity-50" : ""}`}
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="assigned">Assigned</option>
-                          <option value="in-transit">In Transit</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))
+                  orders.map((order) => {
+                    const orderId = String(order._id || order.id || "");
+                    const displayId = orderId.length > 10
+                      ? `${orderId.slice(0, 6)}...${orderId.slice(-4)}`
+                      : orderId;
+
+                    return (
+                      <tr
+                        key={orderId}
+                        className="hover:bg-gray-50/80 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div className="font-semibold text-gray-900" title={orderId}>
+                            #{displayId}
+                          </div>
+                          <div className="text-gray-500 font-medium">
+                            {new Date(order.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="font-medium text-gray-900">
+                            {order.userId?.name || "Unknown"}
+                          </div>
+                          <div className="text-gray-500 text-xs">
+                            {order.userId?.email || ""}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <span className="capitalize font-medium">{order.fuelType}</span>
+                          <div className="text-gray-500">({order.quantity}L)</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
+                          {order.deliveryLocation}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full capitalize ${getStatusColor(order.status)}`}
+                          >
+                            {formatStatusLabel(order.status)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <select
+                            disabled={updatingId === orderId}
+                            value={normalizeStatus(order.status)}
+                            onChange={(e) =>
+                              handleStatusChange(orderId, e.target.value)
+                            }
+                            className={`block w-full pl-3 pr-8 py-1.5 text-xs font-medium bg-gray-50 border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 rounded-md border ${updatingId === orderId ? "opacity-50" : ""}`}
+                          >
+                            {statusOptions.map((status) => (
+                              <option key={status} value={status}>
+                                {formatStatusLabel(status)}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

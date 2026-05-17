@@ -1,10 +1,11 @@
 const express = require("express");
 const { z } = require("zod");
-const { ORDER_STATUS } = require("../constants/orderStatus");
+const { ORDER_STATUS, normalizeOrderStatus } = require("../constants/orderStatus");
 const {
 	listOrders,
 	updateStatus,
 	getOrder,
+	listStatuses,
 } = require("../controllers/admin.controller");
 const {
 	validateBody,
@@ -16,7 +17,10 @@ const { requireAuth, requireRole } = require("../middlewares/auth.middleware");
 const router = express.Router();
 
 const updateStatusSchema = z.object({
-	status: z.enum(ORDER_STATUS),
+	status: z.preprocess(
+		(value) => normalizeOrderStatus(value),
+		z.enum(ORDER_STATUS)
+	),
 });
 
 const orderIdSchema = z.object({
@@ -31,7 +35,9 @@ const toOptionalNumber = (value) => {
 };
 
 const listOrdersQuerySchema = z.object({
-	status: z.enum(ORDER_STATUS).optional(),
+	status: z
+		.preprocess((value) => normalizeOrderStatus(value), z.enum(ORDER_STATUS))
+		.optional(),
 	search: z.string().min(1).max(100).optional(),
 	from: z.string().datetime().optional(),
 	to: z.string().datetime().optional(),
@@ -41,6 +47,7 @@ const listOrdersQuerySchema = z.object({
 
 router.use(requireAuth, requireRole("admin"));
 
+router.get("/orders/statuses", listStatuses);
 router.get("/orders", validateQuery(listOrdersQuerySchema), listOrders);
 router.get("/orders/:id", validateParams(orderIdSchema), getOrder);
 router.patch(

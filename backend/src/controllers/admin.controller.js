@@ -3,6 +3,7 @@ const {
 	updateOrderStatus,
 	getOrderById,
 } = require("../services/order.service");
+const { ORDER_STATUS } = require("../constants/orderStatus");
 
 const listOrders = async (req, res, next) => {
 	try {
@@ -38,8 +39,13 @@ const getOrder = async (req, res, next) => {
 	}
 };
 
+const listStatuses = (req, res) => {
+	return res.status(200).json({ statuses: ORDER_STATUS });
+};
+
 module.exports = {
 	listOrders,
 	updateStatus,
 	getOrder,
+	listStatuses,
 };

@@ -23,10 +23,23 @@ export default function OrderDetails() {
     }
   };
 
+  const normalizeStatus = (status) =>
+    String(status || "").trim().toLowerCase().replace(/\s+/g, "-");
+
+  const formatStatusLabel = (status) => {
+    const normalized = normalizeStatus(status);
+    if (!normalized) return "";
+
+    return normalized
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   const steps = [
     { key: "pending", label: "Pending" },
-    { key: "assigned", label: "Accepted" },
-    { key: "in-transit", label: "Out for Delivery" },
+    { key: "accepted", label: "Accepted" },
+    { key: "out-for-delivery", label: "Out for Delivery" },
     { key: "delivered", label: "Delivered" },
   ];
 
@@ -55,8 +68,9 @@ export default function OrderDetails() {
     );
   }
 
-  const isCancelled = order.status === "cancelled";
-  const currentStep = getStepIndex(order.status);
+  const normalizedStatus = normalizeStatus(order.status);
+  const isCancelled = normalizedStatus === "cancelled";
+  const currentStep = getStepIndex(normalizedStatus);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -83,7 +97,7 @@ export default function OrderDetails() {
           <span
             className={`px-3.5 py-1.5 inline-flex text-sm font-semibold rounded-full capitalize ${isCancelled ? "bg-red-100 text-red-800" : "bg-blue-100 text-blue-800"}`}
           >
-            {order.status}
+            {formatStatusLabel(order.status)}
           </span>
         </div>
 

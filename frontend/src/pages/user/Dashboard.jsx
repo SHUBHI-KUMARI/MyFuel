@@ -24,19 +24,37 @@ export default function Dashboard() {
     fetchOrders();
   }, []);
 
+  const normalizeStatus = (status) =>
+    String(status || "").trim().toLowerCase().replace(/\s+/g, "-");
+
+  const formatStatusLabel = (status) => {
+    const normalized = normalizeStatus(status);
+    if (!normalized) return "";
+
+    return normalized
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   const totalOrders = orders.length;
-  const pendingOrders = orders.filter(o => o.status === 'Pending').length;
-  const deliveredOrders = orders.filter(o => o.status === 'Delivered').length;
+  const pendingOrders = orders.filter(o => normalizeStatus(o.status) === "pending").length;
+  const deliveredOrders = orders.filter(o => normalizeStatus(o.status) === "delivered").length;
 
   const recentOrders = orders.slice(0, 5);
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'Pending': return 'bg-yellow-100 text-yellow-800';
-      case 'Accepted': return 'bg-blue-100 text-blue-800';
-      case 'Out for Delivery': return 'bg-orange-100 text-orange-800';
-      case 'Delivered': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+    switch (normalizeStatus(status)) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "accepted":
+        return "bg-blue-100 text-blue-800";
+      case "out-for-delivery":
+        return "bg-orange-100 text-orange-800";
+      case "delivered":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -147,7 +165,7 @@ export default function Dashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                          {order.status}
+                          {formatStatusLabel(order.status)}
                         </span>
                       </td>
                     </tr>

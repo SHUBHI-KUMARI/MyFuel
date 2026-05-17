@@ -5,11 +5,11 @@ import AuthLayout from "../layouts/AuthLayout";
 import { useAuth } from "../store/AuthContext";
 import Login from "../pages/auth/Login";
 import Signup from "../pages/auth/Signup";
+import Dashboard from "../pages/user/Dashboard";
+import PlaceOrder from "../pages/user/PlaceOrder";
+import OrderHistory from "../pages/user/OrderHistory";
 
 // Stubs for now
-const Dashboard = () => (
-  <div className="p-4 text-center">Dashboard Page Stub</div>
-);
 const AdminOrders = () => (
   <div className="p-4 text-center">Admin Orders Page Stub</div>
 );
@@ -41,6 +41,22 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute allowedRole="user">
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/place-order"
+          element={
+            <ProtectedRoute allowedRole="user">
+              <PlaceOrder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order-history"
+          element={
+            <ProtectedRoute allowedRole="user">
+              <OrderHistory />
             </ProtectedRoute>
           }
         />

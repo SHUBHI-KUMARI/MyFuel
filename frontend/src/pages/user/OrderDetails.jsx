@@ -59,34 +59,35 @@ export default function OrderDetails() {
   const currentStep = getStepIndex(order.status);
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div className="mb-6">
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mb-2">
         <Link
           to="/order-history"
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+          className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors flex items-center gap-1"
         >
-          &larr; Back to Order History
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          Back to Order History
         </Link>
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div className="px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-200">
+      <div className="card">
+        <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100 bg-gray-50/50">
           <div>
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
+            <h3 className="text-xl font-bold text-gray-900">
               Order Tracking
             </h3>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 font-mono">
               Order #{order._id.substring(0, 8)}
             </p>
           </div>
           <span
-            className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full capitalize ${isCancelled ? "bg-red-100 text-red-800" : "bg-blue-100 text-blue-800"}`}
+            className={`px-3.5 py-1.5 inline-flex text-sm font-semibold rounded-full capitalize ${isCancelled ? "bg-red-100 text-red-800" : "bg-blue-100 text-blue-800"}`}
           >
             {order.status}
           </span>
         </div>
 
-        <div className="px-4 py-8 sm:px-6">
+        <div className="px-6 py-8">
           {isCancelled ? (
             <div className="bg-red-50 p-6 rounded-lg text-center border border-red-200">
               <h4 className="text-lg font-bold text-red-700 mb-2">
@@ -170,38 +171,43 @@ export default function OrderDetails() {
           )}
         </div>
 
-        <div className="bg-gray-50 px-4 py-5 sm:px-6 grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-gray-200">
-          <div>
-            <h4 className="text-sm font-medium text-gray-500">Fuel Details</h4>
-            <p className="mt-1 text-sm text-gray-900 capitalize font-medium">
-              {order.fuelType}
-            </p>
-            <p className="text-sm text-gray-600">{order.quantity} Liters</p>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-gray-500">
-              Delivery Location
-            </h4>
-            <p className="mt-1 text-sm text-gray-900">
-              {order.deliveryLocation}
-            </p>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-gray-500">Order Date</h4>
-            <p className="mt-1 text-sm text-gray-900">
-              {new Date(order.createdAt).toLocaleString()}
-            </p>
-          </div>
-          {order.preferredDeliveryTime && (
-            <div>
-              <h4 className="text-sm font-medium text-gray-500">
-                Preferred Delivery Info
-              </h4>
-              <p className="mt-1 text-sm text-gray-900">
-                {new Date(order.preferredDeliveryTime).toLocaleString()}
+        <div className="bg-gray-50/80 px-6 py-6 border-t border-gray-100">
+          <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-4">Order Summary</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+              <span className="text-sm font-medium text-gray-500">Fuel Details</span>
+              <p className="mt-1 text-lg text-gray-900 capitalize font-bold">
+                {order.fuelType}
+              </p>
+              <p className="text-sm text-gray-600 font-medium">{order.quantity} Liters requested</p>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+              <span className="text-sm font-medium text-gray-500">Delivery Location</span>
+              <p className="mt-1 text-base text-gray-900 font-medium">
+                {order.deliveryLocation}
               </p>
             </div>
-          )}
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+              <span className="text-sm font-medium text-gray-500">Order Placed</span>
+              <p className="mt-1 text-base text-gray-900 font-medium">
+                {new Date(order.createdAt).toLocaleString(undefined, {
+                  year: 'numeric', month: 'long', day: 'numeric',
+                  hour: '2-digit', minute: '2-digit'
+                })}
+              </p>
+            </div>
+            {order.preferredDeliveryTime && (
+              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                <span className="text-sm font-medium text-gray-500">Preferred Delivery Info</span>
+                <p className="mt-1 text-base text-gray-900 font-medium text-blue-700">
+                  {new Date(order.preferredDeliveryTime).toLocaleString(undefined, {
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                  })}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

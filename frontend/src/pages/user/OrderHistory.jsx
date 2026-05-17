@@ -60,21 +60,24 @@ export default function OrderHistory() {
     );
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">
-          Order History
-        </h1>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Order History
+          </h1>
+          <p className="text-gray-500 mt-1">View and track all your past fuel deliveries.</p>
+        </div>
 
-        <div className="flex items-center space-x-2">
-          <label htmlFor="filter" className="text-sm font-medium text-gray-700">
-            Filter by Status:
+        <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+          <label htmlFor="filter" className="text-sm font-medium text-gray-600">
+            Filter:
           </label>
           <select
             id="filter"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="block w-40 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
+            className="block w-40 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm transition-shadow"
           >
             <option value="all">All Orders</option>
             <option value="pending">Pending</option>
@@ -89,14 +92,14 @@ export default function OrderHistory() {
       {/* Mobile view (Cards) */}
       <div className="block md:hidden space-y-4">
         {filteredOrders.length === 0 ? (
-          <p className="text-center text-gray-500 py-8 bg-white rounded-lg shadow">
-            No orders found.
-          </p>
+          <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
+            <p className="text-gray-500 font-medium">No orders found.</p>
+          </div>
         ) : (
           filteredOrders.map((order) => (
             <div
               key={order._id}
-              className="bg-white shadow rounded-lg p-4 border border-gray-200"
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow"
             >
               <div className="flex justify-between items-center mb-3">
                 <span className="text-sm font-medium text-gray-900">
@@ -142,49 +145,49 @@ export default function OrderHistory() {
       </div>
 
       {/* Desktop view (Table) */}
-      <div className="hidden md:block bg-white shadow overflow-hidden sm:rounded-lg border border-gray-200">
+      <div className="hidden md:block card">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-100">
+            <thead className="bg-gray-50/50">
               <tr>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                 >
                   Order ID
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                 >
                   Date
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                 >
                   Fuel Details
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                 >
                   Location
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                 >
                   Status
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-100">
               {filteredOrders.length === 0 ? (
                 <tr>
                   <td
                     colSpan="5"
-                    className="px-6 py-10 text-center text-gray-500"
+                    className="px-6 py-12 text-center text-gray-500"
                   >
                     No orders found matching the selected filter.
                   </td>
@@ -193,23 +196,23 @@ export default function OrderHistory() {
                 filteredOrders.map((order) => (
                   <tr
                     key={order._id}
-                    className="hover:bg-gray-50 transition-colors"
+                    className="hover:bg-gray-50/80 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       <Link
                         to={`/order/${order._id}`}
-                        className="text-blue-600 hover:text-blue-800 hover:underline transition-colors block w-full"
+                        className="text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors block w-full"
                       >
                         #{order._id.substring(0, 8)}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                       <div className="flex flex-col">
                         <span>
-                          {new Date(order.createdAt).toLocaleDateString()}
+                          {new Date(order.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                         </span>
                         {order.preferredDeliveryTime && (
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-500 font-normal">
                             Pref:{" "}
                             {new Date(
                               order.preferredDeliveryTime,
@@ -229,7 +232,7 @@ export default function OrderHistory() {
                         ({order.quantity}L)
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                    <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
                       {order.deliveryLocation}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

@@ -8,6 +8,7 @@ import Signup from "../pages/auth/Signup";
 import Dashboard from "../pages/user/Dashboard";
 import PlaceOrder from "../pages/user/PlaceOrder";
 import OrderHistory from "../pages/user/OrderHistory";
+import OrderDetails from "../pages/user/OrderDetails";
 
 // Stubs for now
 const AdminOrders = () => (
@@ -57,6 +58,14 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute allowedRole="user">
               <OrderHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order/:id"
+          element={
+            <ProtectedRoute allowedRole="user">
+              <OrderDetails />
             </ProtectedRoute>
           }
         />

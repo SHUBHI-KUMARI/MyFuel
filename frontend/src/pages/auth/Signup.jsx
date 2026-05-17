@@ -15,6 +15,36 @@ export default function Signup() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const demoAccounts = {
+    user: { email: "user@myfuel.test", password: "TestUser123!" },
+    admin: { email: "admin@myfuel.test", password: "TestAdmin123!" },
+  };
+
+  const performLogin = async (emailValue, passwordValue) => {
+    setError("");
+    setLoading(true);
+    try {
+      const response = await client.post(ENDPOINTS.AUTH.LOGIN, {
+        email: emailValue,
+        password: passwordValue,
+      });
+      const { user, token } = response.data;
+      login(user, token);
+
+      if (user.role === "admin") {
+        navigate("/admin/orders", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Failed to login. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -46,12 +76,18 @@ export default function Signup() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          err.response?.data?.errors?.[0] ||
-          "Failed to sign up. Please try again.",
+        err.response?.data?.errors?.[0] ||
+        "Failed to sign up. Please try again.",
       );
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDemoLogin = async (role) => {
+    const account = demoAccounts[role];
+    if (!account) return;
+    await performLogin(account.email, account.password);
   };
 
   return (
@@ -183,6 +219,33 @@ export default function Signup() {
           </button>
         </div>
       </form>
+
+      <div className="mt-6 border-t pt-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Quick demo access
+        </p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => handleDemoLogin("user")}
+            disabled={loading}
+            className="w-full inline-flex items-center justify-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Login as user
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDemoLogin("admin")}
+            disabled={loading}
+            className="w-full inline-flex items-center justify-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Login as admin
+          </button>
+        </div>
+        <p className="mt-3 text-xs text-gray-500">
+          Uses seeded demo accounts from the README.
+        </p>
+      </div>
     </div>
   );
 }

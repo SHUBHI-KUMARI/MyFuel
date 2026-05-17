@@ -10,10 +10,7 @@ import PlaceOrder from "../pages/user/PlaceOrder";
 import OrderHistory from "../pages/user/OrderHistory";
 import OrderDetails from "../pages/user/OrderDetails";
 
-// Stubs for now
-const AdminOrders = () => (
-  <div className="p-4 text-center">Admin Orders Page Stub</div>
-);
+import AdminOrders from "../pages/admin/AdminOrders";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { user } = useAuth();

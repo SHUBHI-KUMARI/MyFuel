@@ -11,16 +11,21 @@ const toSafeUser = (user) => ({
 	updatedAt: user.updatedAt,
 });
 
-const signupUser = async ({ name, email, password }) => {
-	const existing = await User.findOne({ email });
-	if (existing) {
-		const error = new Error("Email already in use");
-		error.status = 409;
-		throw error;
-	}
+const signupUser = async ({ name, email, password, adminCode }) => {
+        const existing = await User.findOne({ email });
+        if (existing) {
+                const error = new Error("Email already in use");
+                error.status = 409;
+                throw error;
+        }
 
-	const passwordHash = await bcrypt.hash(password, 10);
-	const user = await User.create({ name, email, passwordHash, role: "user" });
+        const passwordHash = await bcrypt.hash(password, 10);
+        let role = "user";
+        if (adminCode && process.env.ADMIN_SECRET_CODE && adminCode === process.env.ADMIN_SECRET_CODE) {
+                role = "admin";
+        }
+
+        const user = await User.create({ name, email, passwordHash, role });
 	const token = signToken({ id: user._id, role: user.role });
 
 	return {

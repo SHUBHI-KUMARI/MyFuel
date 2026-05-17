@@ -4,15 +4,17 @@ Fuel Order Management Mini System for the My Fuels internship assessment. The ap
 
 ## Demo credentials
 
-Create these accounts once via the Signup screen, then use them to log in.
+Create these accounts once via the Signup screen, or run the seed script to insert them automatically.
 
-- User
-	- Email: user@myfuel.test
-	- Password: TestUser123!
+- Users (all use the same password)
+  - user@myfuel.test
+  - aisha@myfuel.test
+  - daniel@myfuel.test
+  - Password: TestUser123!
 - Admin
-	- Email: admin@myfuel.test
-	- Password: TestAdmin123!
-	- Admin code (during signup): MYFUEL_ADMIN_2026
+  - Email: admin@myfuel.test
+  - Password: TestAdmin123!
+  - Admin code (during signup): MYFUEL_ADMIN_2026
 
 Set `ADMIN_SECRET_CODE=MYFUEL_ADMIN_2026` in the backend `.env` so the admin signup works.
 
@@ -69,6 +71,13 @@ npm install
 npm run dev
 ```
 
+Optional: seed demo data (clears users and orders first):
+
+```
+cd backend
+npm run seed
+```
+
 Server runs at `http://localhost:3000`.
 
 ### 2) Frontend
@@ -100,39 +109,39 @@ Base URL: `http://localhost:3000`
 ### Auth
 
 - `POST /api/auth/signup`
-	- Body: `{ name, email, password, adminCode? }`
-	- Response: `{ token, user }`
+  - Body: `{ name, email, password, adminCode? }`
+  - Response: `{ token, user }`
 - `POST /api/auth/login`
-	- Body: `{ email, password }`
-	- Response: `{ token, user }`
+  - Body: `{ email, password }`
+  - Response: `{ token, user }`
 - `GET /api/auth/me`
-	- Headers: `Authorization: Bearer <token>`
-	- Response: `{ user }`
+  - Headers: `Authorization: Bearer <token>`
+  - Response: `{ user }`
 
 ### User orders (auth required)
 
 - `POST /api/orders`
-	- Body: `{ fuelType, quantity, deliveryLocation, preferredDeliveryTime? }`
-	- Response: `{ order }`
+  - Body: `{ fuelType, quantity, deliveryLocation, preferredDeliveryTime? }`
+  - Response: `{ order }`
 - `GET /api/orders`
-	- Response: `{ orders }`
+  - Response: `{ orders }`
 - `GET /api/orders/:id`
-	- Response: `{ order }`
+  - Response: `{ order }`
 
 ### Admin orders (admin only)
 
 - `GET /api/admin/orders`
-	- Query: `status`, `search`, `from`, `to`, `page`, `limit`
-	- Response: `{ orders, meta }`
+  - Query: `status`, `search`, `from`, `to`, `page`, `limit`
+  - Response: `{ orders, meta }`
 - `GET /api/admin/orders/:id`
-	- Response: `{ order }`
+  - Response: `{ order }`
 - `PATCH /api/admin/orders/:id/status`
-	- Body: `{ status }`
-	- Status values: `Pending`, `Accepted`, `Out for Delivery`, `Delivered`
+  - Body: `{ status }`
+  - Status values: `Pending`, `Accepted`, `Out for Delivery`, `Delivered`
 
 ## Scripts
 
-- Backend: `npm run dev`, `npm start`
+- Backend: `npm run dev`, `npm start`, `npm run seed`
 - Frontend: `npm run dev`, `npm run build`, `npm run preview`
 
 ## Notes
